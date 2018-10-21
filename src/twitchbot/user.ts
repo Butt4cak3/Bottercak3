@@ -4,7 +4,7 @@ interface Tags {
   "display-name": string;
   color: string;
   mod: boolean;
-  badges: { [key: string]: string };
+  badges: { [key: string]: string } | null;
 }
 
 export class User {
@@ -26,9 +26,9 @@ export class User {
     this.displayName = tags["display-name"];
     this.color = tags.color;
     this.isModerator = tags.mod;
-    this.isTurbo = tags.badges.turbo === "1";
-    this.isBroadcaster = tags.badges.broadcaster === "1";
-    this.isSubscriber = tags.badges.subscriber === "1";
+    this.isTurbo = tags.badges != null && tags.badges.turbo === "1";
+    this.isBroadcaster = tags.badges != null && tags.badges.broadcaster === "1";
+    this.isSubscriber = tags.badges != null && tags.badges.subscriber === "1";
     this.isOp = isOp;
     this.isBot = isBot;
   }

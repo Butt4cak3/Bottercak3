@@ -1,6 +1,10 @@
 declare module "tmi.js" {
   type ReadyState = "CONNECTING" | "OPEN" | "CLOSING" | "CLOSED";
 
+  interface Badges {
+    [key: string]: string;
+  }
+
   interface ClientOptions {
     options?: {
       clientId?: string
@@ -30,9 +34,7 @@ declare module "tmi.js" {
   }
 
   interface UserState {
-    badges: {
-      [key: string]: string
-    };
+    badges: Badges | null;
     color: string;
     "display-name": string;
     emotes: { [key: string]: string[] };
@@ -48,6 +50,7 @@ declare module "tmi.js" {
   function client(options: ClientOptions): Client;
 
   class Client {
+    public connect(): void;
     public getChannels(): string[];
     public getOptions(): ClientOptions;
     public getUsername(): string;
