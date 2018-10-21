@@ -36,10 +36,7 @@ export class TMIConnector {
         "display-name": userstate["display-name"],
         color: userstate.color,
         mod: userstate.mod,
-        turbo: userstate.turbo,
-        type: userstate["user-type"],
         badges: userstate.badges,
-        subscriber: userstate.subscriber
       };
 
       this.onChatMessage.invoke({

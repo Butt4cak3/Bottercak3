@@ -4,10 +4,7 @@ interface Tags {
   "display-name": string;
   color: string;
   mod: boolean;
-  turbo: boolean;
-  type: unknown;
   badges: { [key: string]: string };
-  subscriber: boolean;
 }
 
 export class User {
@@ -17,7 +14,6 @@ export class User {
   public readonly color: string;
   public readonly isModerator: boolean;
   public readonly isTurbo: boolean;
-  public readonly type: unknown;
   public readonly isSubscriber: boolean;
   public readonly isBroadcaster: boolean;
   public readonly isOp: boolean;
@@ -30,10 +26,9 @@ export class User {
     this.displayName = tags["display-name"];
     this.color = tags.color;
     this.isModerator = tags.mod;
-    this.isTurbo = tags.turbo;
-    this.type = tags.type;
+    this.isTurbo = tags.badges.turbo === "1";
     this.isBroadcaster = tags.badges.broadcaster === "1";
-    this.isSubscriber = tags.subscriber;
+    this.isSubscriber = tags.badges.subscriber === "1";
     this.isOp = isOp;
     this.isBot = isBot;
   }

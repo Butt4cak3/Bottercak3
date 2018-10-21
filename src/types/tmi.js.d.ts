@@ -38,10 +38,7 @@ declare module "tmi.js" {
     emotes: { [key: string]: string[] };
     mod: boolean;
     "room-id": string;
-    subscriber: boolean;
-    turbo: boolean;
     "user-id": string;
-    "user-type": string;
     "emotes-raw": string;
     "badges-raw": string;
     username: string;
