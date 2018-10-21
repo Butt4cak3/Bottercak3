@@ -1,3 +1,5 @@
+import { Dict } from "collections";
+
 declare module "tmi.js" {
   type ReadyState = "CONNECTING" | "OPEN" | "CLOSING" | "CLOSED";
 
@@ -37,7 +39,7 @@ declare module "tmi.js" {
     badges: Badges | null;
     color: string;
     "display-name": string;
-    emotes: { [key: string]: string[] };
+    emotes: Dict<string[]>;
     mod: boolean;
     "room-id": string;
     "user-id": string;

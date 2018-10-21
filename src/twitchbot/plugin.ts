@@ -12,3 +12,7 @@ export abstract class Plugin {
 
   public deinit(): void {}
 }
+
+export interface PluginConstructor {
+  new(bot: TwitchBot): Plugin;
+}

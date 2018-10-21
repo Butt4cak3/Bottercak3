@@ -1,10 +1,17 @@
-interface Tags {
-  "user-id": string;
-  nick: string;
-  "display-name": string;
+import { Dict } from "collections";
+
+interface UserState {
+  id: string;
+  name: string;
+  displayName: string;
   color: string;
-  mod: boolean;
-  badges: { [key: string]: string } | null;
+  badges: Dict<string>;
+  isModerator: boolean;
+  isTurbo: boolean;
+  isSubscriber: boolean;
+  isBroadcaster: boolean;
+  isOp?: boolean;
+  isBot?: boolean;
 }
 
 export class User {
@@ -12,24 +19,25 @@ export class User {
   public readonly name: string;
   public readonly displayName: string;
   public readonly color: string;
-  public readonly isModerator: boolean;
+  public readonly badges: Dict<string>;
   public readonly isTurbo: boolean;
   public readonly isSubscriber: boolean;
+  public readonly isModerator: boolean;
   public readonly isBroadcaster: boolean;
   public readonly isOp: boolean;
   public readonly isBot: boolean;
-  public readonly permissions: unknown;
 
-  public constructor(tags: Tags, isOp: boolean, isBot: boolean) {
-    this.id = tags["user-id"];
-    this.name = tags.nick;
-    this.displayName = tags["display-name"];
-    this.color = tags.color;
-    this.isModerator = tags.mod;
-    this.isTurbo = tags.badges != null && tags.badges.turbo === "1";
-    this.isBroadcaster = tags.badges != null && tags.badges.broadcaster === "1";
-    this.isSubscriber = tags.badges != null && tags.badges.subscriber === "1";
-    this.isOp = isOp;
-    this.isBot = isBot;
+  public constructor(state: UserState) {
+    this.id = state.id;
+    this.name = state.name;
+    this.displayName = state.displayName;
+    this.color = state.color;
+    this.badges = { ...state.badges };
+    this.isTurbo = state.isTurbo;
+    this.isSubscriber = state.isSubscriber;
+    this.isModerator = state.isModerator;
+    this.isBroadcaster = state.isBroadcaster;
+    this.isOp = state.isOp || false;
+    this.isBot = state.isBot || false;
   }
 }

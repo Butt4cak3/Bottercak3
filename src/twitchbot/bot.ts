@@ -1,15 +1,17 @@
 import { Event } from "./event";
-import { Connector, ChatMessage } from "./connection";
+import { Connector, ChatMessage } from "./connector";
 import fs from "fs";
 import path from "path";
-import { Plugin } from "./plugin";
+import { Plugin, PluginConstructor } from "./plugin";
+import { Dict } from "collections";
+import { User } from "./user";
 
 export class TwitchBot {
   private readonly connection: Connector;
   private readonly bots: string[] = [];
   private readonly ops: string[] = [];
   private readonly name: string = "";
-  private readonly plugins: { [name: string]: Plugin } = {};
+  private readonly plugins: Dict<Plugin> = Object.create(null);
 
   public readonly onChatMessage = new Event<ChatMessage>();
 
@@ -79,20 +81,20 @@ export class TwitchBot {
       return;
     }
 
-    const user = {
+    const sender = new User({
       ...message.sender,
       isBot: this.bots.indexOf(message.sender.name) !== -1,
       isOp: this.ops.indexOf(message.sender.name) !== -1
-    };
+    });
 
     this.onChatMessage.invoke({
-      sender: user,
+      sender,
       text: message.text,
       channel: message.channel
     });
   }
 
-  private moduleContainsPlugin(module: any): module is { default: { new(bot: TwitchBot): Plugin } } {
+  private moduleContainsPlugin(module: any): module is { default: PluginConstructor } {
     return "default" in module &&
       typeof module.default === "function" &&
       module.default.prototype instanceof Plugin;

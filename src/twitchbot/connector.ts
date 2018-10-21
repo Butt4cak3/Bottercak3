@@ -31,19 +31,22 @@ export class TMIConnector {
     this.client.on("chat", (channel, userstate, message, self) => {
       if (self) return;
 
-      const tags = {
-        "user-id": userstate["user-id"],
-        nick: userstate.username,
-        "display-name": userstate["display-name"],
+      const state = {
+        id: userstate["user-id"],
+        name: userstate.username,
+        displayName: userstate["display-name"],
         color: userstate.color,
-        mod: userstate.mod,
-        badges: userstate.badges,
+        badges: userstate.badges || {},
+        isTurbo: userstate.badges != null && userstate.badges.turbo === "1",
+        isSubscriber: userstate.badges != null && userstate.badges.subscriber === "1",
+        isModerator: userstate.mod,
+        isBroadcaster: userstate.badges != null && userstate.badges.broadcaster === "1"
       };
 
       this.onChatMessage.invoke({
         channel: channel.substr(1),
         text: message,
-        sender: new User(tags, false, false)
+        sender: new User(state)
       });
     });
   }
