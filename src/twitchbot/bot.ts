@@ -21,6 +21,10 @@ export class TwitchBot {
     });
   }
 
+  public main() {
+    this.connection.connect();
+  }
+
   public async loadPlugins(rootDir: string) {
     return new Promise((resolve, reject) => {
       const imports: Promise<{ name: string, module: unknown }>[] = [];

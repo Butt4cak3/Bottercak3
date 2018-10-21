@@ -9,6 +9,7 @@ export interface ChatMessage {
 }
 
 export interface Connector {
+  connect(): void;
   readonly onChatMessage: Event<ChatMessage>;
 }
 
@@ -45,5 +46,9 @@ export class TMIConnector {
         sender: new User(tags, false, false)
       });
     });
+  }
+
+  public connect() {
+    this.client.connect();
   }
 }
