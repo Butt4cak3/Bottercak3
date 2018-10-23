@@ -4,6 +4,8 @@
   "description": "A self-hostable, extensible Twitch bot",
   "author": "Marius Becker <marius.becker.8@gmail.com>",
   "license": "MIT",
+  "main": "dist/lib.js",
+  "types": "dist/types/lib.js",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/test.ts",
     "build": "tsc",
