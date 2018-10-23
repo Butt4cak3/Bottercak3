@@ -5,7 +5,6 @@ export abstract class Plugin {
 
   public constructor(bot: TwitchBot) {
     this.bot = bot;
-    this.init();
   }
 
   public abstract init(): void;

@@ -1,7 +1,5 @@
 import { Event, ChatMessageEvent, ConnectEvent, DisconnectEvent, JoinEvent, PartEvent } from "./events";
 import { Connector, ChatMessage } from "./connector";
-import fs from "fs";
-import path from "path";
 import { Plugin, PluginConstructor } from "./plugin";
 import { Dict } from "./collections";
 import { User } from "./user";
@@ -23,7 +21,6 @@ export class TwitchBot {
   private readonly ops: string[];
   private readonly channels: string[];
   private readonly plugins: Dict<Plugin>;
-  private pluginDir?: string;
 
   public readonly onChatMessage: ChatMessageEvent = new Event();
   public readonly onConnect: ConnectEvent = new Event();
@@ -48,64 +45,15 @@ export class TwitchBot {
   }
 
   public async main() {
-    await this.loadPlugins();
     await this.connector.connect();
   }
 
-  public setPluginDir(pluginDir: string) {
-    this.pluginDir = pluginDir;
-  }
+  public loadPlugin(constructor: PluginConstructor) {
+    const pluginName = constructor.name;
+    const plugin = new constructor(this);
 
-  private loadPlugins() {
-    const rootDir = this.pluginDir;
-    if (!rootDir) return Promise.resolve();
-
-    return new Promise((resolve, reject) => {
-      const imports: Promise<{ name: string, module: unknown }>[] = [];
-
-      fs.readdir(rootDir, (err, items) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        if (!items) {
-          resolve();
-          return;
-        }
-
-        for (const pluginName of items) {
-          const pluginDir = path.join(rootDir, pluginName);
-          const stat = fs.lstatSync(pluginDir);
-
-          if (!stat.isDirectory) continue;
-
-          imports.push(import(path.join(pluginDir, "main")).then((module) => {
-            return {
-              name: pluginName,
-              module: module
-            };
-          }));
-        }
-
-        Promise.all(imports).then((results) => {
-          for (const result of results) {
-            const pluginName = result.name;
-            const module = result.module;
-
-            if (!this.moduleContainsPlugin(module)) {
-              console.error(`${pluginName} is not a valid plugin.`);
-              continue;
-            }
-
-            const plugin = new module.default(this);
-            this.plugins[pluginName] = plugin;
-          }
-
-          resolve();
-        });
-      });
-    });
+    this.plugins[pluginName] = plugin;
+    plugin.init();
   }
 
   public say(channel: string, message: string) {
@@ -165,11 +113,5 @@ export class TwitchBot {
       const plugin = this.plugins[pluginName];
       plugin.deinit();
     }
-  }
-
-  private moduleContainsPlugin(module: any): module is { default: PluginConstructor } {
-    return "default" in module &&
-      typeof module.default === "function" &&
-      module.default.prototype instanceof Plugin;
   }
 }
