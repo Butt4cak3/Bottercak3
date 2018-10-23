@@ -10,6 +10,26 @@ export interface Configuration {
   bots: string[];
   ops: string[];
   channels: string[];
+  commandPrefix: string;
+}
+
+export interface Command {
+  definition: CommandDefinition;
+  params: string[];
+  sender: User;
+  channel: string;
+}
+
+interface CommandDefinition {
+  name: string;
+  handler: (command: Command) => void;
+  permissions: string[];
+}
+
+interface PartialCommandDefinition {
+  name: string;
+  handler: (command: Command) => void;
+  permissions?: string[];
 }
 
 export class TwitchBot {
@@ -21,6 +41,8 @@ export class TwitchBot {
   private readonly ops: string[];
   private readonly channels: string[];
   private readonly plugins: Dict<Plugin>;
+  private readonly commands: Dict<CommandDefinition>;
+  private commandPrefix: string;
 
   public readonly onChatMessage: ChatMessageEvent = new Event();
   public readonly onConnect: ConnectEvent = new Event();
@@ -36,6 +58,8 @@ export class TwitchBot {
     this.ops = config.ops || [];
     this.channels = config.channels || [];
     this.plugins = Object.create(null);
+    this.commands = Object.create(null);
+    this.commandPrefix = config.commandPrefix || "!";
 
     this.connector.onChatMessage.subscribe(message => this.chatMessageHandler(message));
     this.onConnect.connect(this.connector.onConnect);
@@ -54,6 +78,50 @@ export class TwitchBot {
 
     this.plugins[pluginName] = plugin;
     plugin.init();
+  }
+
+  public registerCommand(definition: PartialCommandDefinition) {
+    const command = {
+      name: definition.name,
+      handler: definition.handler,
+      permissions: definition.permissions || []
+    };
+
+    this.commands[command.name] = command;
+  }
+
+  public executeCommand(command: Command) {
+    command.definition.handler(command);
+  }
+
+  public parseCommand(message: ChatMessage): Command | null {
+    if (!message.text.startsWith(this.commandPrefix)) {
+      return null;
+    }
+
+    // This matches a single parameter, whether it it is surrounded by
+    // quotation marks or not. The left part matches any non-whitespace string
+    // without any quotation marks and the right part matches any series of
+    // characters that is surrounded by quotation marks but does not contain
+    // any.
+    const re = /([^"\s]+|"[^"]+")/g;
+    const text = message.text;
+    const matches = text.match(re);
+    const params = matches != null ? [...matches] : [];
+    const name = params.shift()!.slice(1);
+
+    if (!(name in this.commands)) {
+      return null;
+    }
+
+    const command: Command = {
+      definition: this.commands[name],
+      channel: message.channel,
+      sender: message.sender,
+      params: params
+    };
+
+    return command;
   }
 
   public say(channel: string, message: string) {
@@ -84,7 +152,8 @@ export class TwitchBot {
       password: this.password,
       bots: [...this.bots],
       ops: [...this.ops],
-      channels: [...this.channels]
+      channels: [...this.channels],
+      commandPrefix: this.commandPrefix
     };
   }
 
@@ -98,6 +167,14 @@ export class TwitchBot {
       isBot: this.bots.indexOf(message.sender.name) !== -1,
       isOp: this.ops.indexOf(message.sender.name) !== -1
     });
+
+    if (message.text.startsWith(this.commandPrefix)) {
+      const command = this.parseCommand(message);
+
+      if (command) {
+        this.executeCommand(command);
+      }
+    }
 
     this.onChatMessage.invoke({
       sender,
