@@ -1,6 +1,6 @@
 import { Dict } from "./collections";
 
-declare module "tmi.js" {
+declare module "twitch-js" {
   type ReadyState = "CONNECTING" | "OPEN" | "CLOSING" | "CLOSED";
 
   interface Badges {

@@ -1,6 +1,6 @@
 import { Event, ChatMessageEvent, ConnectEvent, DisconnectEvent, JoinEvent, PartEvent } from "./events";
 import { User } from "./user";
-import tmi from "tmi.js";
+import TwitchJS from "twitch-js";
 import { Configuration } from "./bot";
 
 export interface ChatMessage {
@@ -24,8 +24,8 @@ export interface Connector {
   whisper(username: string, message: string): void;
 }
 
-export class TMIConnector {
-  private readonly client: tmi.Client;
+export class TwitchJSConnector {
+  private readonly client: TwitchJS.Client;
 
   public readonly onChatMessage: ChatMessageEvent = new Event();
   public readonly onConnect: ConnectEvent = new Event();
@@ -40,7 +40,7 @@ export class TMIConnector {
       throw new Error();
     }
 
-    this.client = tmi.client({
+    this.client = TwitchJS.client({
       identity: {
         username,
         password

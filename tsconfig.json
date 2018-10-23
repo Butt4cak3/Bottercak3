@@ -17,7 +17,7 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
-      "tmi.js": ["src/tmi.js"]
+      "twitch-js": ["src/twitch-js"]
     }
   }
 }
