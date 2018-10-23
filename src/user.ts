@@ -1,4 +1,4 @@
-import { Dict } from "collections";
+import { Dict } from "./collections";
 
 interface UserState {
   id: string;

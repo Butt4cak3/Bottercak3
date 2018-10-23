@@ -1,4 +1,4 @@
-import { Dict } from "collections";
+import { Dict } from "./collections";
 
 declare module "tmi.js" {
   type ReadyState = "CONNECTING" | "OPEN" | "CLOSING" | "CLOSED";

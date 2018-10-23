@@ -17,9 +17,7 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
-      "twitchbot/*": ["src/twitchbot/*"],
-      "tmi.js": ["src/types/tmi.js"],
-      "collections": ["src/types/collections"]
+      "tmi.js": ["src/tmi.js"]
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Plugin } from "twitchbot/plugin";
+import { Plugin } from "../../plugin";
 
 export default class General extends Plugin {
   public init() {

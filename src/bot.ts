@@ -3,7 +3,7 @@ import { Connector, ChatMessage } from "./connector";
 import fs from "fs";
 import path from "path";
 import { Plugin, PluginConstructor } from "./plugin";
-import { Dict } from "collections";
+import { Dict } from "./collections";
 import { User } from "./user";
 
 export interface Configuration {
