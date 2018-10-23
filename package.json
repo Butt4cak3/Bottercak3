@@ -1,6 +1,13 @@
 {
+  "name": "bottercak3",
+  "version": "0.1.0",
+  "description": "A self-hostable, extensible Twitch bot",
+  "author": "Marius Becker <marius.becker.8@gmail.com>",
+  "license": "MIT",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/test.ts"
+    "start": "ts-node -r tsconfig-paths/register src/test.ts",
+    "build": "tsc",
+    "prepare": "tsc"
   },
   "devDependencies": {
     "@types/js-yaml": "^3.11.2",
