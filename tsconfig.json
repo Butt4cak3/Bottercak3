@@ -5,6 +5,7 @@
     "declaration": true,
     "sourceMap": true,
     "outDir": "dist/",
+    "declarationDir": "dist/types/",
     "rootDir": "src/",
     "removeComments": false,
     "strict": true,
