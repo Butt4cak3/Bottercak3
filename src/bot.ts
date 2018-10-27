@@ -31,7 +31,7 @@ export class TwitchBot {
   public constructor(connector: Connector, config: Partial<Configuration>) {
     this.connector = connector;
     this.name = config.username || "";
-    this.password = config.password || "";
+    this.password = "";
     this.bots = config.bots || [];
     this.ops = config.ops || [];
     this.channels = config.channels || [];
