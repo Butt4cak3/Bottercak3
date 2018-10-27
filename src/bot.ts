@@ -2,7 +2,7 @@ import { Event, ChatMessageEvent, ConnectEvent, DisconnectEvent, JoinEvent, Part
 import { Connector, ChatMessage } from "./connector";
 import { Plugin, PluginConstructor } from "./plugin";
 import { Dict } from "./collections";
-import { User } from "./user";
+import { User, Permission } from "./user";
 
 export interface Configuration {
   username: string;
@@ -23,13 +23,13 @@ export interface Command {
 interface CommandDefinition {
   name: string;
   handler: (command: Command) => void;
-  permissions: string[];
+  permissionLevel: Permission;
 }
 
 interface PartialCommandDefinition {
   name: string;
   handler: (command: Command) => void;
-  permissions?: string[];
+  permissionLevel?: Permission;
 }
 
 export class TwitchBot {
@@ -84,7 +84,7 @@ export class TwitchBot {
     const command = {
       name: definition.name,
       handler: definition.handler,
-      permissions: definition.permissions || []
+      permissionLevel: definition.permissionLevel || Permission.MODERATOR
     };
 
     this.commands[command.name] = command;
@@ -162,16 +162,18 @@ export class TwitchBot {
       return;
     }
 
-    const sender = new User({
+    const userState = {
       ...message.sender,
       isBot: this.bots.indexOf(message.sender.name) !== -1,
       isOp: this.ops.indexOf(message.sender.name) !== -1
-    });
+    };
+
+    const sender = new User(userState);
 
     if (message.text.startsWith(this.commandPrefix)) {
       const command = this.parseCommand(message);
 
-      if (command) {
+      if (command && sender.hasPermission(command.definition.permissionLevel)) {
         this.executeCommand(command);
       }
     }
