@@ -84,7 +84,9 @@ export class TwitchBot {
     const command = {
       name: definition.name,
       handler: definition.handler,
-      permissionLevel: definition.permissionLevel || Permission.MODERATOR
+      permissionLevel: definition.permissionLevel != null
+        ? definition.permissionLevel
+        : Permission.MODERATOR
     };
 
     this.commands[command.name] = command;
