@@ -91,7 +91,15 @@ export class TwitchBot {
   }
 
   public executeCommand(command: Command) {
-    command.definition.handler(command);
+    try {
+      command.definition.handler(command);
+    } catch (e) {
+      this.say(command.channel, "I tried to execute that command but something went horribly wrong.");
+
+      if (e instanceof Error) {
+        console.error(e.stack);
+      }
+    }
   }
 
   public parseCommand(message: ChatMessage): Command | null {
