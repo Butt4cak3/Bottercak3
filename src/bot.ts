@@ -164,8 +164,8 @@ export class TwitchBot {
 
     const userState = {
       ...message.sender,
-      isBot: this.bots.indexOf(message.sender.name) !== -1,
-      isOp: this.ops.indexOf(message.sender.name) !== -1
+      isBot: this.isBot(message.sender.name),
+      isOp: this.isOP(message.sender.name)
     };
 
     const sender = new User(userState);
@@ -192,5 +192,17 @@ export class TwitchBot {
       const plugin = this.plugins[pluginName];
       plugin.deinit();
     }
+  }
+
+  public isOP(username: string) {
+    return this.ops.indexOf(username) !== -1;
+  }
+
+  public isBot(username: string) {
+    return this.bots.indexOf(username) !== -1;
+  }
+
+  public addBot(username: string) {
+    this.bots.push(username.toLowerCase());
   }
 }
