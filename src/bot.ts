@@ -54,8 +54,8 @@ export class TwitchBot {
     this.connector = connector;
     this.name = config.username || "";
     this.password = "";
-    this.bots = config.bots || [];
-    this.ops = config.ops || [];
+    this.bots = config.bots ? config.bots.map(name => name.toLowerCase()) : [];
+    this.ops = config.ops ? config.ops.map(name => name.toLowerCase()) : [];
     this.channels = config.channels || [];
     this.plugins = Object.create(null);
     this.commands = Object.create(null);
