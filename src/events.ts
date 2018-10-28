@@ -1,23 +1,25 @@
 import { ChatMessage } from "./connector";
 
+type Handler<T> = (data: T) => void;
+
 interface Listener<T> {
-  handler: (data: T) => void;
+  handler: Handler<T>;
   thisArg: any;
 }
 
 export class Event<T> {
-  private listeners: Listener<T>[] = [];
+  private listeners = new Map<Handler<T>, Listener<T>>();
 
-  public subscribe(handler: (data: T) => void, thisArg?: any) {
-    this.listeners.push({ handler, thisArg });
+  public subscribe(handler: Handler<T>, thisArg?: any) {
+    this.listeners.set(handler, { handler, thisArg });
   }
 
-  public unsubscribe() {
-    throw new Error("Not implemented");
+  public unsubscribe(handler: Handler<T>) {
+    this.listeners.delete(handler);
   }
 
   public invoke(data: T) {
-    for (const listener of this.listeners) {
+    for (const listener of this.listeners.values()) {
       listener.handler.call(listener.thisArg, data);
     }
   }
