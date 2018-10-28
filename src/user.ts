@@ -49,11 +49,11 @@ export class User {
     this.isOp = state.isOp || false;
     this.isBot = state.isBot || false;
 
-    if (this.isOp) this.permissionLevel =  Permission.OP
-    else if (this.isBroadcaster) this.permissionLevel =  Permission.BROADCASTER
-    else if (this.isModerator) this.permissionLevel =  Permission.MODERATOR
-    else if (this.isSubscriber) this.permissionLevel =  Permission.SUBSCRIBER
-    else this.permissionLevel =  Permission.EVERYONE;
+    if (this.isOp) this.permissionLevel = Permission.OP;
+    else if (this.isBroadcaster) this.permissionLevel = Permission.BROADCASTER;
+    else if (this.isModerator) this.permissionLevel = Permission.MODERATOR;
+    else if (this.isSubscriber) this.permissionLevel = Permission.SUBSCRIBER;
+    else this.permissionLevel = Permission.EVERYONE;
   }
 
   public hasPermission(required: Permission) {

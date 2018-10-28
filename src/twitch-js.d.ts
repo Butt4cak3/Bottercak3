@@ -9,8 +9,8 @@ declare module "twitch-js" {
 
   interface ClientOptions {
     options?: {
-      clientId?: string
-      debug?: boolean
+      clientId?: string;
+      debug?: boolean;
     };
 
     connection?: {
@@ -55,17 +55,11 @@ declare module "twitch-js" {
 
   function client(options: ClientOptions): Client;
 
-  interface RoomState {
+  interface RoomState {}
 
-  }
+  interface SubMethods {}
 
-  interface SubMethods {
-
-  }
-
-  interface EmoteSets {
-
-  }
+  interface EmoteSets {}
 
   class Client {
     public getChannels(): string[];
@@ -99,15 +93,26 @@ declare module "twitch-js" {
     public slowoff(channel: string): Promise<[string]>;
     public subscribers(channel: string): Promise<[string]>;
     public subscribersoff(channel: string): Promise<[string]>;
-    public timeout(channel: string, username: string, length: number, reason: string): Promise<[string, string, number, string]>;
+    public timeout(
+      channel: string,
+      username: string,
+      length: number,
+      reason: string
+    ): Promise<[string, string, number, string]>;
     public unban(channel: string, username: string): Promise<[string, string]>;
     public unhost(channel: string): Promise<[string]>;
     public unmod(channel: string, username: string): Promise<[string, string]>;
     public whisper(username: string, message: string): Promise<[string, string]>;
 
-    public on(event: "action", callback: (channel: string, userstate: UserState, message: string, self: boolean) => void): void;
+    public on(
+      event: "action",
+      callback: (channel: string, userstate: UserState, message: string, self: boolean) => void
+    ): void;
     public on(event: "ban", callback: (channel: string, username: string, reason: string) => void): void;
-    public on(event: "chat", callback: (channel: string, userstate: UserState, message: string, self: boolean) => void): void;
+    public on(
+      event: "chat",
+      callback: (channel: string, userstate: UserState, message: string, self: boolean) => void
+    ): void;
     public on(event: "cheer", callback: (channel: string, userstate: CheerUserState, message: string) => void): void;
     public on(event: "clearchat", callback: (channel: string) => void): void;
     public on(event: "connected", callback: (address: string, port: number) => void): void;
@@ -116,11 +121,17 @@ declare module "twitch-js" {
     public on(event: "emoteonly", callback: (channel: string, enabled: boolean) => void): void;
     public on(event: "emotesets", callback: (sets: string, obj: EmoteSets) => void): void;
     public on(event: "followersonly", callback: (channel: string, enabled: boolean, length: number) => void): void;
-    public on(event: "hosted", callback: (channel: string, username: string, viewers: number, autohost: boolean) => void): void;
+    public on(
+      event: "hosted",
+      callback: (channel: string, username: string, viewers: number, autohost: boolean) => void
+    ): void;
     public on(event: "hosting", callback: (channel: string, target: string, viewers: number) => void): void;
     public on(event: "join", callback: (channel: string, username: string, self: boolean) => void): void;
     public on(event: "logon", callback: () => void): void;
-    public on(event: "message", callback: (channel: string, userstate: UserState, message: string, self: boolean) => void): void;
+    public on(
+      event: "message",
+      callback: (channel: string, userstate: UserState, message: string, self: boolean) => void
+    ): void;
     public on(event: "mod", callback: (channel: string, username: string) => void): void;
     public on(event: "mods", callback: (channel: string, mods: string[]) => void): void;
     public on(event: "notice", callback: (channel: string, msgid: string, message: string) => void): void;
@@ -129,15 +140,34 @@ declare module "twitch-js" {
     public on(event: "pong", callback: (latency: number) => void): void;
     public on(event: "r9kbeta", callback: (channel: string, enabled: boolean) => void): void;
     public on(event: "reconnect", callback: () => void): void;
-    public on(event: "resub", callback: (channel: string, username: string, months: number, message: string, userstate: UserState, methods: SubMethods) => void): void;
+    public on(
+      event: "resub",
+      callback: (
+        channel: string,
+        username: string,
+        months: number,
+        message: string,
+        userstate: UserState,
+        methods: SubMethods
+      ) => void
+    ): void;
     public on(event: "roomstate", callback: (channel: string, state: RoomState) => void): void;
     public on(event: "serverchange", callback: (channel: string) => void): void;
     public on(event: "slowmode", callback: (channel: string, enabled: boolean, length: number) => void): void;
     public on(event: "subscribers", callback: (channel: string, enabled: boolean) => void): void;
-    public on(event: "subscription", callback: (channel: string, username: string, method: SubMethods, message: string, userstate: UserState) => void): void;
-    public on(event: "timeout", callback: (channel: string, username: string, reason: string, duration: number) => void): void;
+    public on(
+      event: "subscription",
+      callback: (channel: string, username: string, method: SubMethods, message: string, userstate: UserState) => void
+    ): void;
+    public on(
+      event: "timeout",
+      callback: (channel: string, username: string, reason: string, duration: number) => void
+    ): void;
     public on(event: "unhost", callback: (channel: string, viewers: number) => void): void;
     public on(event: "unmod", callback: (channel: string, username: string) => void): void;
-    public on(event: "whisper", callback: (from: string, userstate: UserState, message: string, self: boolean) => void): void;
+    public on(
+      event: "whisper",
+      callback: (from: string, userstate: UserState, message: string, self: boolean) => void
+    ): void;
   }
 }

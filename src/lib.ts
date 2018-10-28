@@ -1,8 +1,8 @@
 export * from "./bot";
-export { Plugin } from "./plugin";
 export * from "./connector";
 export * from "./events";
-export { User, Permission } from "./user";
+export { Plugin } from "./plugin";
+export { Permission, User } from "./user";
 
 import General from "./plugins/general";
 

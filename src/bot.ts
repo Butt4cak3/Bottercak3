@@ -1,8 +1,8 @@
-import { Event, ChatMessageEvent, ConnectEvent, DisconnectEvent, JoinEvent, PartEvent } from "./events";
-import { Connector, ChatMessage } from "./connector";
-import { Plugin, PluginConstructor } from "./plugin";
 import { Dict } from "./collections";
-import { User, Permission } from "./user";
+import { ChatMessage, Connector } from "./connector";
+import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, PartEvent } from "./events";
+import { Plugin, PluginConstructor } from "./plugin";
+import { Permission, User } from "./user";
 
 export interface Configuration {
   username: string;
@@ -84,9 +84,7 @@ export class TwitchBot {
     const command = {
       name: definition.name,
       handler: definition.handler,
-      permissionLevel: definition.permissionLevel != null
-        ? definition.permissionLevel
-        : Permission.MODERATOR
+      permissionLevel: definition.permissionLevel != null ? definition.permissionLevel : Permission.MODERATOR
     };
 
     this.commands[command.name] = command;

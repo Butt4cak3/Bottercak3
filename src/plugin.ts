@@ -13,5 +13,5 @@ export abstract class Plugin {
 }
 
 export interface PluginConstructor {
-  new(bot: TwitchBot): Plugin;
+  new (bot: TwitchBot): Plugin;
 }

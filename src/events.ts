@@ -31,9 +31,8 @@ export class Event<T> {
   }
 }
 
-
 export type ChatMessageEvent = Event<ChatMessage>;
 export type ConnectEvent = Event<{}>;
 export type DisconnectEvent = Event<{}>;
-export type JoinEvent = Event<{ channel: string, username: string }>;
-export type PartEvent = Event<{ channel: string, username: string }>;
+export type JoinEvent = Event<{ channel: string; username: string }>;
+export type PartEvent = Event<{ channel: string; username: string }>;

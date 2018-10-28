@@ -1,7 +1,7 @@
-import { Event, ChatMessageEvent, ConnectEvent, DisconnectEvent, JoinEvent, PartEvent } from "./events";
-import { User } from "./user";
 import TwitchJS from "twitch-js";
 import { Configuration } from "./bot";
+import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, PartEvent } from "./events";
+import { User } from "./user";
 
 export interface ChatMessage {
   channel: string;

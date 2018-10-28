@@ -1,7 +1,7 @@
-import { Plugin, Command } from "../lib";
-import { Permission } from "../user";
 import { Dict } from "src/collections";
 import { ChatMessage } from "src/connector";
+import { Command, Plugin } from "../lib";
+import { Permission } from "../user";
 
 export default class General extends Plugin {
   private aliases: Dict<string> = Object.create(null);
@@ -51,7 +51,7 @@ export default class General extends Plugin {
   }
 
   public alias(command: Command) {
-    if (command.params.length < 1 || command.params[0].startsWith("@") && command.params.length < 3) {
+    if (command.params.length < 1 || (command.params[0].startsWith("@") && command.params.length < 3)) {
       return;
     }
 
@@ -71,7 +71,11 @@ export default class General extends Plugin {
     // If the first character of the first parameter is an @, then use that as
     // the permission level
     if (command.params[0].startsWith("@")) {
-      const param = command.params.shift()!.substr(1).toUpperCase();
+      const param = command.params
+        .shift()!
+        .substr(1)
+        .toUpperCase();
+
       if (param in Permission) {
         permissionLevel = Permission[param as keyof typeof Permission];
       }
@@ -131,7 +135,7 @@ export default class General extends Plugin {
   public leave(command: Command) {
     const channel = command.params[0] || command.channel;
 
-    if (command.sender.isOp || channel === command.channel && command.sender.isBroadcaster) {
+    if (command.sender.isOp || (channel === command.channel && command.sender.isBroadcaster)) {
       this.bot.part(channel);
     } else {
       this.bot.say(command.channel, `@${command.sender.displayName} You can't make me leave other people's channels.`);
