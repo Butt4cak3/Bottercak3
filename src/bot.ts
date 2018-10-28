@@ -37,9 +37,9 @@ export class TwitchBot {
 
   private readonly connector: Connector;
   private readonly password: string;
-  private readonly bots: string[];
-  private readonly ops: string[];
-  private readonly channels: string[];
+  private readonly bots: Set<string>;
+  private readonly ops: Set<string>;
+  private readonly channels: Set<string>;
   private readonly plugins: Dict<Plugin>;
   private readonly commands: Dict<CommandDefinition>;
   private commandPrefix: string;
@@ -54,9 +54,9 @@ export class TwitchBot {
     this.connector = connector;
     this.name = config.username || "";
     this.password = "";
-    this.bots = config.bots ? config.bots.map(name => name.toLowerCase()) : [];
-    this.ops = config.ops ? config.ops.map(name => name.toLowerCase()) : [];
-    this.channels = config.channels || [];
+    this.bots = new Set(config.bots != null ? config.bots.map(name => name.toLowerCase()) : []);
+    this.ops = new Set(config.ops != null ? config.ops.map(name => name.toLowerCase()) : []);
+    this.channels = new Set(config.channels != null ? config.channels.map(name => name.toLowerCase()) : []);
     this.plugins = Object.create(null);
     this.commands = Object.create(null);
     this.commandPrefix = config.commandPrefix || "!";
@@ -203,15 +203,15 @@ export class TwitchBot {
   }
 
   public isOP(username: string) {
-    return this.ops.indexOf(username) !== -1;
+    return this.ops.has(username);
   }
 
   public isBot(username: string) {
-    return this.bots.indexOf(username) !== -1;
+    return this.bots.has(username);
   }
 
   public addBot(username: string) {
-    this.bots.push(username.toLowerCase());
+    this.bots.add(username.toLowerCase());
   }
 
   public get commandList() {
