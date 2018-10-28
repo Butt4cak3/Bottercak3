@@ -215,4 +215,14 @@ export class TwitchBot {
   public addBot(username: string) {
     this.bots.push(username.toLowerCase());
   }
+
+  public get commandList() {
+    const result: string[] = [];
+
+    for (const name in this.commands) {
+      result.push(name);
+    }
+
+    return result;
+  }
 }

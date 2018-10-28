@@ -14,6 +14,18 @@ export default class General extends Plugin {
     });
 
     this.bot.registerCommand({
+      name: "commands",
+      handler: this.help.bind(this),
+      permissionLevel: Permission.EVERYONE
+    });
+
+    this.bot.registerCommand({
+      name: "help",
+      handler: this.help.bind(this),
+      permissionLevel: Permission.EVERYONE
+    });
+
+    this.bot.registerCommand({
       name: "join",
       handler: this.join.bind(this),
       permissionLevel: Permission.OP
@@ -99,6 +111,12 @@ export default class General extends Plugin {
     if (newCommand != null) {
       this.bot.executeCommand(newCommand);
     }
+  }
+
+  public help(command: Command) {
+    let commands = this.bot.commandList.map(name => this.bot.config.commandPrefix + name).join(" ");
+
+    this.bot.say(command.channel, `Available commands: ${commands}`);
   }
 
   public join(command: Command) {
