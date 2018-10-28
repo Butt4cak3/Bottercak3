@@ -3,6 +3,7 @@ import { ChatMessage, Connector } from "./connector";
 import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, PartEvent } from "./events";
 import { Plugin, PluginConstructor } from "./plugin";
 import { Permission, User } from "./user";
+import { PartialProps } from "./util";
 
 export interface Configuration {
   username: string;
@@ -26,11 +27,7 @@ interface CommandDefinition {
   permissionLevel: Permission;
 }
 
-interface PartialCommandDefinition {
-  name: string;
-  handler: (command: Command) => void;
-  permissionLevel?: Permission;
-}
+export type PartialCommandDefinition = PartialProps<CommandDefinition, "permissionLevel">;
 
 export class TwitchBot {
   public readonly name: string;
