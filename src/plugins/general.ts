@@ -7,45 +7,45 @@ export default class General extends Plugin {
   private aliases: Dict<string> = Object.create(null);
 
   public init() {
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "alias",
-      handler: this.alias.bind(this),
+      handler: this.alias,
       permissionLevel: Permission.MODERATOR
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "commands",
-      handler: this.help.bind(this),
+      handler: this.help,
       permissionLevel: Permission.EVERYONE
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "help",
-      handler: this.help.bind(this),
+      handler: this.help,
       permissionLevel: Permission.EVERYONE
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "join",
-      handler: this.join.bind(this),
+      handler: this.join,
       permissionLevel: Permission.OP
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "leave",
-      handler: this.leave.bind(this),
+      handler: this.leave,
       permissionLevel: Permission.BROADCASTER
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "quit",
-      handler: this.quit.bind(this),
+      handler: this.quit,
       permissionLevel: Permission.OP
     });
 
-    this.bot.registerCommand({
+    this.registerCommand({
       name: "say",
-      handler: this.say.bind(this),
+      handler: this.say,
       permissionLevel: Permission.MODERATOR
     });
   }
