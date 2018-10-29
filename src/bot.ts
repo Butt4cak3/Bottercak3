@@ -92,6 +92,11 @@ export class TwitchBot {
     const plugin = new constructor(this);
 
     this.plugins[pluginName] = plugin;
+    const config = {
+      ...plugin.getDefaultConfiguration(),
+      ...this.config.plugins[pluginName]
+    };
+    plugin.mergeConfiguration(config);
     plugin.init();
   }
 
@@ -170,13 +175,20 @@ export class TwitchBot {
   }
 
   public getConfiguration(): Configuration {
+    const pluginConfigs: Dict<any> = {};
+
+    for (const pluginName in this.plugins) {
+      const plugin = this.plugins[pluginName];
+      pluginConfigs[pluginName] = plugin.getConfiguration();
+    }
+
     return {
       username: this.name,
       bots: [...this.bots],
       ops: [...this.ops],
       channels: [...this.channels],
       commandPrefix: this.commandPrefix,
-      plugins: {}
+      plugins: pluginConfigs
     };
   }
 
