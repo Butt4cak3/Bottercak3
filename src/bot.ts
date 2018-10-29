@@ -12,6 +12,7 @@ export interface Configuration {
   ops: string[];
   channels: string[];
   commandPrefix: string;
+  checkLiveStatusInterval: number;
   plugins: Dict<any>;
 }
 
@@ -36,7 +37,8 @@ export const defaultConfig: Configuration = {
   commandPrefix: "!",
   ops: [],
   plugins: {},
-  username: ""
+  username: "",
+  checkLiveStatusInterval: 10
 };
 
 export class TwitchBot {
@@ -48,6 +50,7 @@ export class TwitchBot {
   private bots: Set<string>;
   private channels: Set<string>;
   private ops: Set<string>;
+  private readonly liveStatus: Dict<boolean>;
 
   private config: Configuration;
 
@@ -56,6 +59,8 @@ export class TwitchBot {
   public readonly onDisconnect: DisconnectEvent = new Event();
   public readonly onJoin: JoinEvent = new Event();
   public readonly onPart: PartEvent = new Event();
+  public readonly onStreamStart: Event<string> = new Event();
+  public readonly onStreamEnd: Event<string> = new Event();
 
   public get commandPrefix() {
     return this.config.commandPrefix;
@@ -75,6 +80,11 @@ export class TwitchBot {
     this.bots = new Set(this.config.bots.map(name => name.toLowerCase()));
     this.ops = new Set(this.config.ops.map(name => name.toLowerCase()));
     this.channels = new Set(this.config.channels.map(channel => channel.toLowerCase()));
+    this.liveStatus = Object.create(null);
+
+    for (const channel of this.channels) {
+      this.liveStatus[channel] = false;
+    }
 
     this.api = TwitchClient.withCredentials(process.env.TWITCH_CLIENT_ID || "");
 
@@ -90,6 +100,34 @@ export class TwitchBot {
 
   public async main() {
     await this.connector.connect();
+
+    this.checkLiveStatus();
+    setInterval(() => this.checkLiveStatus(), this.config.checkLiveStatusInterval * 60000);
+  }
+
+  public async getLiveStatus(channel: string) {
+    const user = await this.api.users.getUserByName(channel);
+    return user != null && await user.getStream() != null;
+  }
+
+  private async checkLiveStatus() {
+    for (const channel of this.channels) {
+      if (!(channel in this.liveStatus)) {
+        this.liveStatus[channel] = false;
+      }
+
+      const isLive = await this.getLiveStatus(channel);
+
+      if (this.liveStatus[channel] !== isLive) {
+        if (isLive) {
+          this.onStreamStart.invoke(channel);
+        } else {
+          this.onStreamEnd.invoke(channel);
+        }
+
+        this.liveStatus[channel] = isLive;
+      }
+    }
   }
 
   public loadPlugin(constructor: PluginConstructor) {
@@ -193,6 +231,7 @@ export class TwitchBot {
       ops: [...this.ops],
       channels: [...this.channels],
       commandPrefix: this.commandPrefix,
+      checkLiveStatusInterval: this.config.checkLiveStatusInterval,
       plugins: pluginConfigs
     };
   }
