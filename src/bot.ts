@@ -112,11 +112,11 @@ export class TwitchBot {
 
   private async checkLiveStatus() {
     for (const channel of this.channels) {
-      if (!(channel in this.liveStatus)) {
-        this.liveStatus[channel] = false;
-      }
-
       const isLive = await this.getLiveStatus(channel);
+
+      if (!(channel in this.liveStatus)) {
+        this.liveStatus[channel] = isLive;
+      }
 
       if (this.liveStatus[channel] !== isLive) {
         if (isLive) {
