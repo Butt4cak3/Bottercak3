@@ -69,9 +69,9 @@ export class TwitchBot {
       ...config
     };
 
-    this.bots = new Set(this.config.bots);
-    this.ops = new Set(this.config.ops);
-    this.channels = new Set(this.config.channels);
+    this.bots = new Set(this.config.bots.map(name => name.toLowerCase()));
+    this.ops = new Set(this.config.ops.map(name => name.toLowerCase()));
+    this.channels = new Set(this.config.channels.map(channel => channel.toLowerCase()));
 
     this.plugins = Object.create(null);
     this.commands = Object.create(null);
