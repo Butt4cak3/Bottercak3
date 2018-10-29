@@ -107,7 +107,7 @@ export default class General extends Plugin {
     const fakeMessage: ChatMessage = {
       channel: command.channel,
       sender: command.sender,
-      text: this.bot.config.commandPrefix + body
+      text: this.bot.commandPrefix + body
     };
 
     const newCommand = this.bot.parseCommand(fakeMessage);
@@ -118,7 +118,7 @@ export default class General extends Plugin {
   }
 
   public help(command: Command) {
-    let commands = this.bot.commandList.map(name => this.bot.config.commandPrefix + name).join(" ");
+    let commands = this.bot.commandList.map(name => this.bot.commandPrefix + name).join(" ");
 
     this.bot.say(command.channel, `Available commands: ${commands}`);
   }

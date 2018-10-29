@@ -1,5 +1,4 @@
 import TwitchJS from "twitch-js";
-import { Configuration } from "./bot";
 import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, PartEvent } from "./events";
 import { User } from "./user";
 
@@ -24,6 +23,12 @@ export interface Connector {
   whisper(username: string, message: string): void;
 }
 
+interface Configuration {
+  username: string;
+  password: string;
+  channels: string[];
+}
+
 export class TwitchJSConnector {
   private readonly client: TwitchJS.Client;
 
@@ -33,7 +38,7 @@ export class TwitchJSConnector {
   public readonly onJoin: JoinEvent = new Event();
   public readonly onPart: PartEvent = new Event();
 
-  public constructor(config: Partial<Configuration>) {
+  public constructor(config: Configuration) {
     const { username, password } = config;
 
     if (!username || !password) {

@@ -7,11 +7,11 @@ import { PartialProps } from "./util";
 
 export interface Configuration {
   username: string;
-  password: string;
   bots: string[];
   ops: string[];
   channels: string[];
   commandPrefix: string;
+  plugins: Dict<any>;
 }
 
 export interface Command {
@@ -29,17 +29,24 @@ interface CommandDefinition {
 
 export type PartialCommandDefinition = PartialProps<CommandDefinition, "permissionLevel">;
 
-export class TwitchBot {
-  public readonly name: string;
+export const defaultConfig: Configuration = {
+  bots: [],
+  channels: [],
+  commandPrefix: "!",
+  ops: [],
+  plugins: {},
+  username: ""
+};
 
+export class TwitchBot {
   private readonly connector: Connector;
-  private readonly password: string;
-  private readonly bots: Set<string>;
-  private readonly ops: Set<string>;
-  private readonly channels: Set<string>;
   private readonly plugins: Dict<Plugin>;
   private readonly commands: Dict<CommandDefinition>;
-  private commandPrefix: string;
+  private bots: Set<string>;
+  private channels: Set<string>;
+  private ops: Set<string>;
+
+  private config: Configuration;
 
   public readonly onChatMessage: ChatMessageEvent = new Event();
   public readonly onConnect: ConnectEvent = new Event();
@@ -47,16 +54,27 @@ export class TwitchBot {
   public readonly onJoin: JoinEvent = new Event();
   public readonly onPart: PartEvent = new Event();
 
+  public get commandPrefix() {
+    return this.config.commandPrefix;
+  }
+
+  public get name() {
+    return this.config.username;
+  }
+
   public constructor(connector: Connector, config: Partial<Configuration>) {
     this.connector = connector;
-    this.name = config.username || "";
-    this.password = "";
-    this.bots = new Set(config.bots != null ? config.bots.map(name => name.toLowerCase()) : []);
-    this.ops = new Set(config.ops != null ? config.ops.map(name => name.toLowerCase()) : []);
-    this.channels = new Set(config.channels != null ? config.channels.map(name => name.toLowerCase()) : []);
+    this.config = {
+      ...defaultConfig,
+      ...config
+    };
+
+    this.bots = new Set(this.config.bots);
+    this.ops = new Set(this.config.ops);
+    this.channels = new Set(this.config.channels);
+
     this.plugins = Object.create(null);
     this.commands = Object.create(null);
-    this.commandPrefix = config.commandPrefix || "!";
 
     this.connector.onChatMessage.subscribe(message => this.chatMessageHandler(message));
     this.onConnect.connect(this.connector.onConnect);
@@ -151,14 +169,14 @@ export class TwitchBot {
     this.connector.whisper(username, message);
   }
 
-  public get config(): Configuration {
+  public getConfiguration(): Configuration {
     return {
       username: this.name,
-      password: this.password,
       bots: [...this.bots],
       ops: [...this.ops],
       channels: [...this.channels],
-      commandPrefix: this.commandPrefix
+      commandPrefix: this.commandPrefix,
+      plugins: {}
     };
   }
 
