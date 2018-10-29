@@ -1,10 +1,23 @@
-import { Dict } from "src/collections";
-import { ChatMessage } from "src/connector";
-import { Command, Plugin } from "../lib";
-import { Permission } from "../user";
+import { Dict } from "../collections";
+import { ChatMessage, Command, Permission, Plugin } from "../lib";
+
+interface Alias {
+  permissionLevel: Permission;
+  commandString: string;
+}
+
+interface Config {
+  aliases: Dict<Alias>;
+}
 
 export default class General extends Plugin {
-  private aliases: Dict<string> = Object.create(null);
+  protected config: Config = this.getDefaultConfiguration();
+
+  public getDefaultConfiguration(): Config {
+    return {
+      aliases: {}
+    };
+  }
 
   public init() {
     this.registerCommand({
@@ -48,6 +61,11 @@ export default class General extends Plugin {
       handler: this.say,
       permissionLevel: Permission.MODERATOR
     });
+
+    for (const name in this.config.aliases) {
+      const alias = this.config.aliases[name];
+      this.createAlias(name, alias.permissionLevel, alias.commandString);
+    }
   }
 
   public alias(command: Command) {
@@ -59,8 +77,8 @@ export default class General extends Plugin {
     if (command.params.length === 1) {
       const alias = command.params[0];
 
-      if (alias in this.aliases) {
-        delete this.aliases[alias];
+      if (alias in this.config.aliases) {
+        delete this.config.aliases[alias];
       }
 
       return;
@@ -85,29 +103,36 @@ export default class General extends Plugin {
     const alias = command.params[0];
 
     // The command that the alias should run
-    const body = command.params.slice(1).join(" ");
+    const commandString = command.params.slice(1).join(" ");
 
-    this.aliases[alias] = body;
+    this.createAlias(alias, permissionLevel, commandString);
+  }
 
-    this.bot.registerCommand({
-      name: alias,
-      handler: this.customCommandHandler.bind(this),
+  private createAlias(name: string, permissionLevel: Permission, commandString: string) {
+    this.config.aliases[name] = {
+      permissionLevel,
+      commandString
+    };
+
+    this.registerCommand({
+      name: name,
+      handler: this.customCommandHandler,
       permissionLevel: permissionLevel
     });
   }
 
   public customCommandHandler(command: Command) {
-    if (!(command.definition.name in this.aliases)) {
+    if (!(command.definition.name in this.config.aliases)) {
       return;
     }
 
-    const body = this.aliases[command.definition.name];
+    const alias = this.config.aliases[command.definition.name];
 
     // Create a fake message and tell the bot to parse it as a command and execute it
     const fakeMessage: ChatMessage = {
       channel: command.channel,
       sender: command.sender,
-      text: this.bot.commandPrefix + body
+      text: this.bot.commandPrefix + alias.commandString
     };
 
     const newCommand = this.bot.parseCommand(fakeMessage);
