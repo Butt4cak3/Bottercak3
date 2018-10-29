@@ -4,6 +4,7 @@ import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, Part
 import { Plugin, PluginConstructor } from "./plugin";
 import { Permission, User } from "./user";
 import { PartialProps } from "./util";
+import TwitchClient from "twitch";
 
 export interface Configuration {
   username: string;
@@ -39,6 +40,8 @@ export const defaultConfig: Configuration = {
 };
 
 export class TwitchBot {
+  public readonly api: TwitchClient;
+
   private readonly connector: Connector;
   private readonly plugins: Dict<Plugin>;
   private readonly commands: Dict<CommandDefinition>;
@@ -72,6 +75,8 @@ export class TwitchBot {
     this.bots = new Set(this.config.bots.map(name => name.toLowerCase()));
     this.ops = new Set(this.config.ops.map(name => name.toLowerCase()));
     this.channels = new Set(this.config.channels.map(channel => channel.toLowerCase()));
+
+    this.api = TwitchClient.withCredentials(process.env.TWITCH_CLIENT_ID || "");
 
     this.plugins = Object.create(null);
     this.commands = Object.create(null);

@@ -1,6 +1,5 @@
 import { Dict } from "../collections";
 import { ChatMessage, Command, Permission, Plugin } from "../lib";
-import TwitchClient from "twitch";
 
 interface Alias {
   permissionLevel: Permission;
@@ -183,15 +182,10 @@ export default class General extends Plugin {
   }
 
   public async uptime(command: Command) {
-    const clientId = process.env.TWITCH_CLIENT_ID;
-    if (clientId == null) return;
-
-    const client = TwitchClient.withCredentials(clientId);
-
-    const user = await client.users.getUserByName(command.channel);
+    const user = await this.bot.api.users.getUserByName(command.channel);
     if (user == null) return;
 
-    const stream = await client.streams.getStreamByChannel(user.id);
+    const stream = await this.bot.api.streams.getStreamByChannel(user.id);
     if (stream == null) return;
 
     const now = new Date().getTime();
