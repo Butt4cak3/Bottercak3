@@ -1,5 +1,6 @@
 import { Dict } from "../collections";
 import { ChatMessage, Command, Permission, Plugin } from "../lib";
+import TwitchClient from "twitch";
 
 interface Alias {
   permissionLevel: Permission;
@@ -60,6 +61,12 @@ export default class General extends Plugin {
       name: "say",
       handler: this.say,
       permissionLevel: Permission.MODERATOR
+    });
+
+    this.registerCommand({
+      name: "uptime",
+      handler: this.uptime,
+      permissionLevel: Permission.EVERYONE
     });
 
     for (const name in this.config.aliases) {
@@ -173,5 +180,33 @@ export default class General extends Plugin {
 
   public say(command: Command) {
     this.bot.say(command.channel, command.params.join(" "));
+  }
+
+  public async uptime(command: Command) {
+    const clientId = process.env.TWITCH_CLIENT_ID;
+    if (clientId == null) return;
+
+    const client = TwitchClient.withCredentials(clientId);
+
+    const user = await client.users.getUserByName(command.channel);
+    if (user == null) return;
+
+    const stream = await client.streams.getStreamByChannel(user.id);
+    if (stream == null) return;
+
+    const now = new Date().getTime();
+    const uptime = (now - stream.startDate.getTime()) / 1000;
+
+    let remaining = uptime;
+
+    const hours = Math.floor(remaining / 3600);
+    remaining -= hours * 3600;
+
+    const minutes = Math.floor(remaining / 60);
+    remaining -= minutes * 60;
+
+    const minutesFormatted = `0${minutes}`.substr(-2);
+
+    this.bot.say(command.channel, `Uptime: ${hours}h ${minutesFormatted}m`);
   }
 }
