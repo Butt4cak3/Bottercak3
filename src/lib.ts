@@ -7,5 +7,5 @@ export { Permission, User } from "./user";
 import General from "./plugins/general";
 
 export const plugins = {
-  General
+  General,
 };

@@ -30,13 +30,13 @@ interface Configuration {
 }
 
 export class TwitchJSConnector {
-  private readonly client: TwitchJS.Client;
 
   public readonly onChatMessage: ChatMessageEvent = new Event();
   public readonly onConnect: ConnectEvent = new Event();
   public readonly onDisconnect: DisconnectEvent = new Event();
   public readonly onJoin: JoinEvent = new Event();
   public readonly onPart: PartEvent = new Event();
+  private readonly client: TwitchJS.Client;
 
   public constructor(config: Configuration) {
     const { username, password } = config;
@@ -47,32 +47,32 @@ export class TwitchJSConnector {
 
     this.client = TwitchJS.client({
       identity: {
+        password,
         username,
-        password
       },
 
-      channels: config.channels || []
+      channels: config.channels || [],
     });
 
     this.client.on("chat", (channel, userstate, message, self) => {
       if (self) return;
 
       const state = {
-        id: userstate["user-id"],
-        name: userstate.username,
-        displayName: userstate["display-name"],
-        color: userstate.color,
         badges: userstate.badges || {},
-        isTurbo: userstate.badges != null && userstate.badges.turbo === "1",
-        isSubscriber: userstate.badges != null && userstate.badges.subscriber === "1",
+        color: userstate.color,
+        displayName: userstate["display-name"],
+        id: userstate["user-id"],
+        isBroadcaster: userstate.badges != null && userstate.badges.broadcaster === "1",
         isModerator: userstate.mod,
-        isBroadcaster: userstate.badges != null && userstate.badges.broadcaster === "1"
+        isSubscriber: userstate.badges != null && userstate.badges.subscriber === "1",
+        isTurbo: userstate.badges != null && userstate.badges.turbo === "1",
+        name: userstate.username,
       };
 
       this.onChatMessage.invoke({
         channel: channel.substr(1),
+        sender: new User(state),
         text: message,
-        sender: new User(state)
       });
     });
 

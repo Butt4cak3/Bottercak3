@@ -1,10 +1,10 @@
+import TwitchClient from "twitch";
 import { Dict } from "./collections";
 import { ChatMessage, Connector } from "./connector";
 import { ChatMessageEvent, ConnectEvent, DisconnectEvent, Event, JoinEvent, PartEvent } from "./events";
 import { Plugin, PluginConstructor } from "./plugin";
 import { Permission, User } from "./user";
 import { PartialProps } from "./util";
-import TwitchClient from "twitch";
 
 export interface Configuration {
   username: string;
@@ -34,15 +34,41 @@ export type PartialCommandDefinition = PartialProps<CommandDefinition, "permissi
 export const defaultConfig: Configuration = {
   bots: [],
   channels: [],
+  checkLiveStatusInterval: 10,
   commandPrefix: "!",
   ops: [],
   plugins: {},
   username: "",
-  checkLiveStatusInterval: 10
 };
 
 export class TwitchBot {
+
+  public get commandPrefix() {
+    return this.config.commandPrefix;
+  }
+
+  public get name() {
+    return this.config.username;
+  }
+
+  public get commandList() {
+    const result: string[] = [];
+
+    for (const name of Object.keys(this.commands)) {
+      result.push(name);
+    }
+
+    return result;
+  }
+
   public readonly api: TwitchClient;
+  public readonly onChatMessage: ChatMessageEvent = new Event();
+  public readonly onConnect: ConnectEvent = new Event();
+  public readonly onDisconnect: DisconnectEvent = new Event();
+  public readonly onJoin: JoinEvent = new Event();
+  public readonly onPart: PartEvent = new Event();
+  public readonly onStreamStart: Event<string> = new Event();
+  public readonly onStreamEnd: Event<string> = new Event();
 
   private readonly connector: Connector;
   private readonly plugins: Dict<Plugin>;
@@ -54,27 +80,11 @@ export class TwitchBot {
 
   private config: Configuration;
 
-  public readonly onChatMessage: ChatMessageEvent = new Event();
-  public readonly onConnect: ConnectEvent = new Event();
-  public readonly onDisconnect: DisconnectEvent = new Event();
-  public readonly onJoin: JoinEvent = new Event();
-  public readonly onPart: PartEvent = new Event();
-  public readonly onStreamStart: Event<string> = new Event();
-  public readonly onStreamEnd: Event<string> = new Event();
-
-  public get commandPrefix() {
-    return this.config.commandPrefix;
-  }
-
-  public get name() {
-    return this.config.username;
-  }
-
   public constructor(connector: Connector, config: Partial<Configuration>) {
     this.connector = connector;
     this.config = {
       ...defaultConfig,
-      ...config
+      ...config,
     };
 
     this.bots = new Set(this.config.bots.map(name => name.toLowerCase()));
@@ -110,26 +120,6 @@ export class TwitchBot {
     return user != null && await user.getStream() != null;
   }
 
-  private async checkLiveStatus() {
-    for (const channel of this.channels) {
-      const isLive = await this.getLiveStatus(channel);
-
-      if (!(channel in this.liveStatus)) {
-        this.liveStatus[channel] = isLive;
-      }
-
-      if (this.liveStatus[channel] !== isLive) {
-        if (isLive) {
-          this.onStreamStart.invoke(channel);
-        } else {
-          this.onStreamEnd.invoke(channel);
-        }
-
-        this.liveStatus[channel] = isLive;
-      }
-    }
-  }
-
   public loadPlugin(constructor: PluginConstructor) {
     const pluginName = constructor.name;
     const plugin = new constructor(this);
@@ -137,7 +127,7 @@ export class TwitchBot {
     this.plugins[pluginName] = plugin;
     const config = {
       ...plugin.getDefaultConfiguration(),
-      ...this.config.plugins[pluginName]
+      ...this.config.plugins[pluginName],
     };
     plugin.mergeConfiguration(config);
     plugin.init();
@@ -145,9 +135,9 @@ export class TwitchBot {
 
   public registerCommand(definition: PartialCommandDefinition) {
     const command = {
-      name: definition.name,
       handler: definition.handler,
-      permissionLevel: definition.permissionLevel != null ? definition.permissionLevel : Permission.MODERATOR
+      name: definition.name,
+      permissionLevel: definition.permissionLevel != null ? definition.permissionLevel : Permission.MODERATOR,
     };
 
     this.commands[command.name] = command;
@@ -186,10 +176,10 @@ export class TwitchBot {
     }
 
     const command: Command = {
-      definition: this.commands[name],
       channel: message.channel,
+      definition: this.commands[name]!,
+      params,
       sender: message.sender,
-      params: params
     };
 
     return command;
@@ -220,57 +210,20 @@ export class TwitchBot {
   public getConfiguration(): Configuration {
     const pluginConfigs: Dict<any> = {};
 
-    for (const pluginName in this.plugins) {
+    for (const pluginName of Object.keys(this.plugins)) {
       const plugin = this.plugins[pluginName];
       pluginConfigs[pluginName] = plugin.getConfiguration();
     }
 
     return {
-      username: this.name,
       bots: [...this.bots],
-      ops: [...this.ops],
       channels: [...this.channels],
-      commandPrefix: this.commandPrefix,
       checkLiveStatusInterval: this.config.checkLiveStatusInterval,
-      plugins: pluginConfigs
+      commandPrefix: this.commandPrefix,
+      ops: [...this.ops],
+      plugins: pluginConfigs,
+      username: this.name,
     };
-  }
-
-  private chatMessageHandler(message: ChatMessage) {
-    if (message.sender.name === this.name) {
-      return;
-    }
-
-    const userState = {
-      ...message.sender,
-      isBot: this.isBot(message.sender.name),
-      isOp: this.isOP(message.sender.name)
-    };
-
-    const sender = new User(userState);
-
-    if (message.text.startsWith(this.commandPrefix)) {
-      const command = this.parseCommand(message);
-
-      if (command && sender.hasPermission(command.definition.permissionLevel)) {
-        this.executeCommand(command);
-      }
-    }
-
-    this.onChatMessage.invoke({
-      sender,
-      text: message.text,
-      channel: message.channel
-    });
-  }
-
-  private disconnectHandler() {
-    this.onDisconnect.invoke({});
-
-    for (const pluginName in this.plugins) {
-      const plugin = this.plugins[pluginName];
-      plugin.deinit();
-    }
   }
 
   public isOP(username: string) {
@@ -285,13 +238,60 @@ export class TwitchBot {
     this.bots.add(username.toLowerCase());
   }
 
-  public get commandList() {
-    const result: string[] = [];
+  private async checkLiveStatus() {
+    for (const channel of this.channels) {
+      const isLive = await this.getLiveStatus(channel);
 
-    for (const name in this.commands) {
-      result.push(name);
+      if (!(channel in this.liveStatus)) {
+        this.liveStatus[channel] = isLive;
+      }
+
+      if (this.liveStatus[channel] !== isLive) {
+        if (isLive) {
+          this.onStreamStart.invoke(channel);
+        } else {
+          this.onStreamEnd.invoke(channel);
+        }
+
+        this.liveStatus[channel] = isLive;
+      }
+    }
+  }
+
+  private chatMessageHandler(message: ChatMessage) {
+    if (message.sender.name === this.name) {
+      return;
     }
 
-    return result;
+    const userState = {
+      ...message.sender,
+      isBot: this.isBot(message.sender.name),
+      isOp: this.isOP(message.sender.name),
+    };
+
+    const sender = new User(userState);
+
+    if (message.text.startsWith(this.commandPrefix)) {
+      const command = this.parseCommand(message);
+
+      if (command && sender.hasPermission(command.definition.permissionLevel)) {
+        this.executeCommand(command);
+      }
+    }
+
+    this.onChatMessage.invoke({
+      channel: message.channel,
+      sender,
+      text: message.text,
+    });
+  }
+
+  private disconnectHandler() {
+    this.onDisconnect.invoke({});
+
+    for (const pluginName of Object.keys(this.plugins)) {
+      const plugin = this.plugins[pluginName];
+      plugin.deinit();
+    }
   }
 }

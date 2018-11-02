@@ -35,8 +35,8 @@ export class Event<T, R = void> {
     }
 
     return {
+      exceptions,
       results,
-      exceptions
     };
   }
 

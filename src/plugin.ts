@@ -16,26 +16,26 @@ export abstract class Plugin {
   public mergeConfiguration(config: any) {
     this.config = {
       ...this.config,
-      ...config
+      ...config,
     };
   }
 
   public getConfiguration() {
     return {
-      ...this.config
+      ...this.config,
     };
-  }
-
-  protected registerCommand(command: PartialCommandDefinition) {
-    this.bot.registerCommand({
-      ...command,
-      handler: command.handler.bind(this)
-    });
   }
 
   public deinit(): void {}
 
   public abstract init(): void;
+
+  protected registerCommand(command: PartialCommandDefinition) {
+    this.bot.registerCommand({
+      ...command,
+      handler: command.handler.bind(this),
+    });
+  }
 }
 
 export interface PluginConstructor {

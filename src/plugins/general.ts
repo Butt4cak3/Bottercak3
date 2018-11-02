@@ -15,60 +15,60 @@ export default class General extends Plugin {
 
   public getDefaultConfiguration(): Config {
     return {
-      aliases: {}
+      aliases: {},
     };
   }
 
   public init() {
     this.registerCommand({
-      name: "alias",
       handler: this.alias,
-      permissionLevel: Permission.MODERATOR
+      name: "alias",
+      permissionLevel: Permission.MODERATOR,
     });
 
     this.registerCommand({
+      handler: this.help,
       name: "commands",
-      handler: this.help,
-      permissionLevel: Permission.EVERYONE
+      permissionLevel: Permission.EVERYONE,
     });
 
     this.registerCommand({
+      handler: this.help,
       name: "help",
-      handler: this.help,
-      permissionLevel: Permission.EVERYONE
+      permissionLevel: Permission.EVERYONE,
     });
 
     this.registerCommand({
-      name: "join",
       handler: this.join,
-      permissionLevel: Permission.OP
+      name: "join",
+      permissionLevel: Permission.OP,
     });
 
     this.registerCommand({
-      name: "leave",
       handler: this.leave,
-      permissionLevel: Permission.BROADCASTER
+      name: "leave",
+      permissionLevel: Permission.BROADCASTER,
     });
 
     this.registerCommand({
-      name: "quit",
       handler: this.quit,
-      permissionLevel: Permission.OP
+      name: "quit",
+      permissionLevel: Permission.OP,
     });
 
     this.registerCommand({
-      name: "say",
       handler: this.say,
-      permissionLevel: Permission.MODERATOR
+      name: "say",
+      permissionLevel: Permission.MODERATOR,
     });
 
     this.registerCommand({
-      name: "uptime",
       handler: this.uptime,
-      permissionLevel: Permission.EVERYONE
+      name: "uptime",
+      permissionLevel: Permission.EVERYONE,
     });
 
-    for (const name in this.config.aliases) {
+    for (const name of Object.keys(this.config.aliases)) {
       const alias = this.config.aliases[name];
       this.createAlias(name, alias.permissionLevel, alias.commandString);
     }
@@ -114,19 +114,6 @@ export default class General extends Plugin {
     this.createAlias(alias, permissionLevel, commandString);
   }
 
-  private createAlias(name: string, permissionLevel: Permission, commandString: string) {
-    this.config.aliases[name] = {
-      permissionLevel,
-      commandString
-    };
-
-    this.registerCommand({
-      name: name,
-      handler: this.customCommandHandler,
-      permissionLevel: permissionLevel
-    });
-  }
-
   public customCommandHandler(command: Command) {
     if (!(command.definition.name in this.config.aliases)) {
       return;
@@ -138,7 +125,7 @@ export default class General extends Plugin {
     const fakeMessage: ChatMessage = {
       channel: command.channel,
       sender: command.sender,
-      text: this.bot.commandPrefix + alias.commandString
+      text: this.bot.commandPrefix + alias.commandString,
     };
 
     const newCommand = this.bot.parseCommand(fakeMessage);
@@ -149,7 +136,7 @@ export default class General extends Plugin {
   }
 
   public help(command: Command) {
-    let commands = this.bot.commandList.map(name => this.bot.commandPrefix + name).join(" ");
+    const commands = this.bot.commandList.map(name => this.bot.commandPrefix + name).join(" ");
 
     this.bot.say(command.channel, `Available commands: ${commands}`);
   }
@@ -202,5 +189,18 @@ export default class General extends Plugin {
     const minutesFormatted = `0${minutes}`.substr(-2);
 
     this.bot.say(command.channel, `Uptime: ${hours}h ${minutesFormatted}m`);
+  }
+
+  private createAlias(name: string, permissionLevel: Permission, commandString: string) {
+    this.config.aliases[name] = {
+      commandString,
+      permissionLevel,
+    };
+
+    this.registerCommand({
+      handler: this.customCommandHandler,
+      name,
+      permissionLevel,
+    });
   }
 }
