@@ -8,6 +8,7 @@
   "types": "dist/types/lib.js",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/test.ts",
+    "lint": "tslint --project .",
     "build": "tsc",
     "prepare": "tsc"
   },
