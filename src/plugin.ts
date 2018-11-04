@@ -1,11 +1,14 @@
 import { PartialCommandDefinition, TwitchBot } from "./bot";
 
 export abstract class Plugin {
+  public readonly name: string;
+
   protected readonly bot: TwitchBot;
   protected config: any;
 
-  public constructor(bot: TwitchBot) {
+  public constructor(bot: TwitchBot, name: string) {
     this.bot = bot;
+    this.name = name;
     this.config = this.getDefaultConfiguration();
   }
 
@@ -39,5 +42,5 @@ export abstract class Plugin {
 }
 
 export interface PluginConstructor {
-  new (bot: TwitchBot): Plugin;
+  new (bot: TwitchBot, name: string): Plugin;
 }

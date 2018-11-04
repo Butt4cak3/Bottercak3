@@ -67,6 +67,8 @@ export class TwitchBot {
   public readonly onDisconnect: DisconnectEvent = new Event();
   public readonly onJoin: JoinEvent = new Event();
   public readonly onPart: PartEvent = new Event();
+  public readonly onPluginLoaded: Event<Plugin> = new Event();
+  public readonly onPluginUnloaded: Event<Plugin> = new Event();
   public readonly onStreamStart: Event<string> = new Event();
   public readonly onStreamEnd: Event<string> = new Event();
 
@@ -122,7 +124,7 @@ export class TwitchBot {
 
   public loadPlugin(constructor: PluginConstructor) {
     const pluginName = constructor.name;
-    const plugin = new constructor(this);
+    const plugin = new constructor(this, pluginName);
 
     this.plugins[pluginName] = plugin;
     const config = {
@@ -131,6 +133,7 @@ export class TwitchBot {
     };
     plugin.mergeConfiguration(config);
     plugin.init();
+    this.onPluginLoaded.invoke(plugin);
   }
 
   public registerCommand(definition: PartialCommandDefinition) {
@@ -153,6 +156,18 @@ export class TwitchBot {
         console.error(e.stack);
       }
     }
+  }
+
+  public getPlugin(name: string): Plugin | null {
+    name = name.toLowerCase();
+
+    for (const pluginName of Object.keys(this.plugins)) {
+      if (pluginName.toLowerCase() === name) {
+        return this.plugins[pluginName];
+      }
+    }
+
+    return null;
   }
 
   public parseCommand(message: ChatMessage): Command | null {
@@ -199,6 +214,27 @@ export class TwitchBot {
 
   public disconnect() {
     this.connector.disconnect();
+  }
+
+  public waitForPlugin(name: string): Promise<Plugin> {
+    name = name.toLowerCase();
+
+    return new Promise((resolve) => {
+      const plugin = this.getPlugin(name);
+
+      if (plugin) {
+        resolve(plugin);
+      }
+
+      const waiter = (plugin: Plugin) => {
+        if (plugin.name.toLowerCase() === name) {
+          this.onPluginLoaded.unsubscribe(waiter);
+          resolve(plugin);
+        }
+      };
+
+      this.onPluginLoaded.subscribe(waiter);
+    });
   }
 
   public whisper(user: User | string, message: string) {
@@ -292,6 +328,7 @@ export class TwitchBot {
     for (const pluginName of Object.keys(this.plugins)) {
       const plugin = this.plugins[pluginName];
       plugin.deinit();
+      this.onPluginUnloaded.invoke(plugin);
     }
   }
 }
