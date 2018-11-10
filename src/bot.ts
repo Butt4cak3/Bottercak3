@@ -311,6 +311,7 @@ export class TwitchBot {
       const command = this.parseCommand(message);
 
       if (command && sender.hasPermission(command.definition.permissionLevel)) {
+        command.sender = sender;
         this.executeCommand(command);
       }
     }
